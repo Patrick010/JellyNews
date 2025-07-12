@@ -201,11 +201,12 @@
                         </div>
                     </div>
                     
-                    <div id="LibrarySelection">
-                        <h3>Content Selection</h3>
-                        <p>Select libraries to include in JellyNews:</p>
+                    <div id="libraryCheckboxes">
+                        <h3>Libraries</h3>
+                        <div class="fieldDescription">
+                            Select which libraries you would like to include in the newsletter.
+                        </div>
                         <div id="libraryCheckboxesContainer">
-                            <!-- Library checkboxes will be dynamically inserted here -->
                         </div>
                     </div>
 
@@ -383,12 +384,8 @@
                         config.Body = document.querySelector('#Body').value;
                         config.Entry = document.querySelector('#Entry').value;
                         
-                        config.SelectedLibraryIds = [];
-                        const libraryCheckboxes = document.querySelectorAll('#libraryCheckboxesContainer input[type="checkbox"]');
-                        libraryCheckboxes.forEach(function(checkbox) {
-                            if (checkbox.checked) {
-                                config.SelectedLibraryIds.push(checkbox.value);
-                            }
+                        config.EnabledLibraries = Array.from(document.querySelectorAll('#libraryCheckboxesContainer input[type="checkbox"]:checked')).map(function (i) {
+                            return i.getAttribute('data-libraryid');
                         });
                         
                         config.PHType = document.querySelector('#HostingSelector').value;
@@ -414,35 +411,22 @@
                         document.querySelector('#Body').value = config.Body;
                         document.querySelector('#Entry').value = config.Entry;
 
-                        const libraryCheckboxesContainer = document.querySelector('#libraryCheckboxesContainer');
-                        libraryCheckboxesContainer.innerHTML = '';
-
-                        ApiClient.getUserViews({}, ApiClient.getCurrentUserId()).then(function(userViewsResult) {
-                            if (userViewsResult && userViewsResult.Items) {
-                                userViewsResult.Items.forEach(function(library) {
-                                    const checkbox = document.createElement('input');
-                                    checkbox.type = 'checkbox';
-                                    checkbox.id = 'lib_' + library.Id;
-                                    checkbox.name = library.Name;
-                                    checkbox.value = library.Id;
-                                    checkbox.is = 'emby-checkbox';
-
-                                    const label = document.createElement('label');
-                                    label.htmlFor = checkbox.id;
-                                    label.className = 'emby-checkbox-label';
-                                    label.appendChild(checkbox);
-                                    label.appendChild(document.createTextNode(library.Name));
-
-                                    const div = document.createElement('div');
-                                    div.className = 'checkboxContainer';
-                                    div.appendChild(label);
-                                    libraryCheckboxesContainer.appendChild(div);
-
-                                    if (config.SelectedLibraryIds && config.SelectedLibraryIds.includes(library.Id)) {
-                                        checkbox.checked = true;
-                                    }
-                                });
-                            }
+                        Dashboard.showLoadingMsg();
+                        var libraryCheckboxesContainer = document.querySelector('#libraryCheckboxesContainer');
+                        ApiClient.getUserViews({}, ApiClient.getCurrentUserId()).then(function (result) {
+                            var html = '';
+                            var index = 0;
+                            result.Items.forEach(function (i) {
+                                var isChecked = config.EnabledLibraries && config.EnabledLibraries.indexOf(i.Id) > -1;
+                                html += '<div class="checkboxContainer">';
+                                html += '<label class="emby-checkbox-label">';
+                                html += '<input is="emby-checkbox" class="libraryCheckbox" type="checkbox" data-libraryid="' + i.Id + '"' + (isChecked ? ' checked="checked"' : '') + '/>';
+                                html += '<span>' + i.Name + '</span>';
+                                html += '</label>';
+                                html += '</div>';
+                                index++;
+                            });
+                            libraryCheckboxesContainer.innerHTML = html;
                         });
 
                         document.querySelector('#HostingSelector').value = config.PHType;

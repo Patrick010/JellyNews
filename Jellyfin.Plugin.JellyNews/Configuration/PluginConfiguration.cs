@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using MediaBrowser.Model.Plugins;
 
@@ -97,8 +98,7 @@ public class PluginConfiguration : BasePluginConfiguration
         NewsletterDir = string.Empty;
 
         // default libraries
-        MoviesEnabled = true;
-        SeriesEnabled = true;
+        EnabledLibraries = new List<string>();
 
         // poster hosting
         PHType = "Imgur";
@@ -234,12 +234,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string NewsletterDir { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether Series should be scanned.
+    /// Gets or sets the enabled libraries.
     /// </summary>
-    public bool SeriesEnabled { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether Movies should be scanned.
-    /// </summary>
-    public bool MoviesEnabled { get; set; }
+    public List<string> EnabledLibraries { get; set; }
 }

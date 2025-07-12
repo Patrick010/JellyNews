@@ -97,23 +97,32 @@ public class Scraper
 
     private void BuildJsonObjsToCurrScanfile()
     {
-        if (!config.SeriesEnabled && !config.MoviesEnabled)
+        if (config.EnabledLibraries.Count == 0)
         {
             logger.Info("No Libraries Enabled In Config!");
+            return;
         }
 
-        if (config.SeriesEnabled)
+        foreach (var libraryId in config.EnabledLibraries)
         {
-            InternalItemsQuery series = new InternalItemsQuery();
-            series.IncludeItemTypes = new[] { BaseItemKind.Episode };
-            BuildObjs(libManager.GetItemList(series), "Series"); // populate series
-        }
+            var library = libManager.GetItemById(libraryId);
+            if (library == null)
+            {
+                logger.Warn($"Library with ID '{libraryId}' not found.");
+                continue;
+            }
 
-        if (config.MoviesEnabled)
-        {
-            InternalItemsQuery movie = new InternalItemsQuery();
-            movie.IncludeItemTypes = new[] { BaseItemKind.Movie };
-            BuildObjs(libManager.GetItemList(movie), "Movie"); // populate movies
+            var itemQuery = new InternalItemsQuery
+            {
+                AncestorIds = new[] { library.Id },
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Episode },
+                IsVirtualItem = false,
+                Recursive = true
+            };
+
+            var items = libManager.GetItemList(itemQuery);
+            var itemType = library.GetClientTypeName();
+            BuildObjs(items, itemType);
         }
     }
 
