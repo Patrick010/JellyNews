@@ -18,9 +18,10 @@ namespace Jellyfin.Plugin.JellyNews;
 /// <summary>
 /// The main plugin.
 /// </summary>
-public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IHasScheduledTasks
+public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     private readonly ILibraryManager _libraryManager;
+    private readonly ITaskManager _taskManager;
     private Logger logger;
 
     /// <summary>
@@ -29,11 +30,13 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IHasSchedul
     /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
     /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILibraryManager libraryManager)
+    /// <param name="taskManager">Instance of the <see cref="ITaskManager"/> interface.</param>
+    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILibraryManager libraryManager, ITaskManager taskManager)
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
         _libraryManager = libraryManager;
+        _taskManager = taskManager;
         logger = new Logger();
         logger.Info("JellyNews Plugin constructor called.");
 
@@ -63,6 +66,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IHasSchedul
         }
 
         SetConfigPaths(applicationPaths);
+
+        _taskManager.CreateTask<ScanLibraryTask>();
+        _taskManager.CreateTask<EmailNewsletterTask>();
+
         logger.Info("JellyNews Plugin constructor finished.");
     }
 
@@ -89,15 +96,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IHasSchedul
                 EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html",
                 EnableInMainMenu = false
             }
-        };
-    }
-
-    public IEnumerable<IScheduledTask> GetScheduledTasks()
-    {
-        return new IScheduledTask[]
-        {
-            new ScanLibraryTask(_libraryManager),
-            new EmailNewsletterTask()
         };
     }
 }
