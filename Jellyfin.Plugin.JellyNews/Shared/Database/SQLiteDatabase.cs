@@ -166,6 +166,7 @@ public class SQLiteDatabase
         //     return _db.PrepareStatement(query);
         // }
 
+
         public void ExecuteSQL(string query)
         {
             logger.Debug("Executing SQL Statement: " + query);
