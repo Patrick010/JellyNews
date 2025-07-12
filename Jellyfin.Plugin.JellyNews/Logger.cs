@@ -58,7 +58,7 @@ public class Logger
     private void Inform(object msg, string type)
     {
         var config = Plugin.Instance.Configuration;
-        var logFile = Path.Combine(config.LogDirectoryPath, $"{GetDate()}_Newsletter.log");
+        var logFile = Path.Combine(config.LogDirectoryPath, $"{GetDate()}_JellyNews.log");
         string logMsgPrefix = $"[NLP]: {GetDateTime()} - [{type}] ";
         Console.WriteLine($"{logMsgPrefix}{msg}");
         File.AppendAllText(logFile, $"{logMsgPrefix}{msg}\n");
