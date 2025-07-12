@@ -4,18 +4,22 @@ using System.Globalization;
 using System.IO;
 using Jellyfin.Plugin.JellyNews.Configuration;
 using Jellyfin.Plugin.JellyNews.LOGGER;
+using Jellyfin.Plugin.JellyNews.ScheduledTasks;
 using MediaBrowser.Common.Configuration;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
+using MediaBrowser.Model.Tasks;
 
 namespace Jellyfin.Plugin.JellyNews;
 
 /// <summary>
 /// The main plugin.
 /// </summary>
-public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
+public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IHasScheduledTasks
 {
+    private readonly ILibraryManager _libraryManager;
     private Logger logger;
 
     /// <summary>
@@ -23,10 +27,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
     /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
+    /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
+    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILibraryManager libraryManager)
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
+        _libraryManager = libraryManager;
         logger = new Logger();
         logger.Info("JellyNews Plugin constructor called.");
 
@@ -82,6 +88,15 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html",
                 EnableInMainMenu = false
             }
+        };
+    }
+
+    public IEnumerable<IScheduledTask> GetScheduledTasks()
+    {
+        return new IScheduledTask[]
+        {
+            new ScanLibraryTask(_libraryManager),
+            new EmailNewsletterTask()
         };
     }
 }

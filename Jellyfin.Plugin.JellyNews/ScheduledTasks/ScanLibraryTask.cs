@@ -18,9 +18,9 @@ namespace Jellyfin.Plugin.JellyNews.ScheduledTasks
     {
         private readonly ILibraryManager _libraryManager;
 
-        public ScanLibraryTask()
+        public ScanLibraryTask(ILibraryManager libraryManager)
         {
-            _libraryManager = (ILibraryManager)Plugin.Instance.GetType().GetProperty("LibraryManager").GetValue(Plugin.Instance);
+            _libraryManager = libraryManager;
         }
 
         /// <inheritdoc />
