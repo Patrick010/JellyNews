@@ -97,6 +97,15 @@ public class Scraper
 
     private void BuildJsonObjsToCurrScanfile()
     {
+        logger.Info("Getting all libraries...");
+        var allLibraries = libManager.GetLibraries();
+        logger.Info($"Found {allLibraries.Count()} libraries in total.");
+
+        foreach (var library in allLibraries)
+        {
+            logger.Info($"Library: {library.Name}, ID: {library.Id}");
+        }
+
         if (config.EnabledLibraries.Count == 0)
         {
             logger.Info("No Libraries Enabled In Config!");
