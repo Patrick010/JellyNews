@@ -13,14 +13,6 @@ public class Logger
     private readonly PluginConfiguration config;
     private readonly string logFile;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Logger"/> class.
-    /// </summary>
-    public Logger()
-    {
-        config = Plugin.Instance!.Configuration;
-        logFile = $"{config.LogDirectoryPath}/{GetDate()}_Newsletter.log";
-    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Debug"/> class.
@@ -65,6 +57,8 @@ public class Logger
     /// <param name="type">Type of warning ("ERR", "WARN", "INFO").</param>
     private void Inform(object msg, string type)
     {
+        var config = Plugin.Instance.Configuration;
+        var logFile = Path.Combine(config.LogDirectoryPath, $"{GetDate()}_Newsletter.log");
         string logMsgPrefix = $"[NLP]: {GetDateTime()} - [{type}] ";
         Console.WriteLine($"{logMsgPrefix}{msg}");
         File.AppendAllText(logFile, $"{logMsgPrefix}{msg}\n");
