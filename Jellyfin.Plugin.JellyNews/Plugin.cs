@@ -75,16 +75,13 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public IEnumerable<PluginPageInfo> GetPages()
     {
         logger.Info("GetPages method called.");
-        var namespacee = GetType().Namespace;
-        logger.Info($"Plugin Namespace: {namespacee}");
-        var embeddedResourcePath = $"{namespacee}.Configuration.configPage.html";
-        logger.Info($"Embedded Resource Path: {embeddedResourcePath}");
         return new[]
         {
             new PluginPageInfo
             {
                 Name = Name,
-                EmbeddedResourcePath = embeddedResourcePath
+                EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html",
+                EnableInMainMenu = true
             }
         };
     }
