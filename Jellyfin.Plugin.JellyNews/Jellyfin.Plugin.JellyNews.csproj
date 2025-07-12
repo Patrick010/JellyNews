@@ -8,6 +8,7 @@
     <Nullable>enable</Nullable>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <CodeAnalysisRuleSet>../jellyfin.ruleset</CodeAnalysisRuleSet>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
