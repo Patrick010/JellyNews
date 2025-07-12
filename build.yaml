@@ -1,6 +1,6 @@
 ---
 name: "JellyNews"
-guid: "60f478ab-2dd6-4ea0-af10-04d033f75979"
+guid: "f7c2c9df-9c38-4421-9d8e-1f6ae91df2ad"
 imageUrl: "https://raw.githubusercontent.com/Cloud9Developer/Jellyfin-Newsletter-Plugin/master/logo.png"
 version: "0.6.4.2"
 targetAbi: "10.9.0.0"

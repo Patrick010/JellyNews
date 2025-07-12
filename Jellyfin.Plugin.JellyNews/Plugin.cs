@@ -64,7 +64,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override string Name => "JellyNews";
 
     /// <inheritdoc />
-    public override Guid Id => Guid.Parse("60f478ab-2dd6-4ea0-af10-04d033f75979");
+    public override Guid Id => Guid.Parse("f7c2c9df-9c38-4421-9d8e-1f6ae91df2ad");
 
     /// <summary>
     /// Gets the current plugin instance.
