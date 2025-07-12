@@ -70,8 +70,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             new PluginPageInfo
             {
                 Name = Name,
-                EmbeddedResourcePath = $"{namespacee}.Configuration.configPage.html",
-                ContentType = "text/html"
+                EmbeddedResourcePath = $"{namespacee}.Configuration.configPage.html"
             }
         };
     }
