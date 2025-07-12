@@ -234,7 +234,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string NewsletterDir { get; set; }
 
     /// <summary>
-    /// Gets the enabled libraries.
+    /// Gets or sets the enabled libraries.
     /// </summary>
-    public IReadOnlyCollection<string> EnabledLibraries { get; private set; }
+    public List<string> EnabledLibraries { get; set; }
 }
