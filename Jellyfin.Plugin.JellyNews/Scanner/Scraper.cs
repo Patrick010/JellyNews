@@ -98,7 +98,7 @@ public class Scraper
     private void BuildJsonObjsToCurrScanfile()
     {
         logger.Info("Getting all libraries...");
-        var allLibraries = libManager.GetLibraries();
+        var allLibraries = libManager.RootFolder.Children.OfType<CollectionFolder>();
         logger.Info($"Found {allLibraries.Count()} libraries in total.");
 
         foreach (var library in allLibraries)
