@@ -11,6 +11,7 @@ using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using MediaBrowser.Model.Tasks;
+using MediaBrowser.Model.Tasks;
 
 namespace Jellyfin.Plugin.JellyNews;
 
