@@ -8,9 +8,9 @@ using Jellyfin.Plugin.JellyNews.ScheduledTasks;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Common.Plugins;
+using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
-using MediaBrowser.Model.Tasks;
 using MediaBrowser.Model.Tasks;
 
 namespace Jellyfin.Plugin.JellyNews;
