@@ -161,6 +161,7 @@ public class SQLiteDatabase
             }
         }
 
+
         // private IStatement PrepareStatement(string query)
         // {
         //     return _db.PrepareStatement(query);

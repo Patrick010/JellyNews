@@ -47,8 +47,8 @@ namespace Jellyfin.Plugin.JellyNews.ScheduledTasks
             cancellationToken.ThrowIfCancellationRequested();
             progress.Report(0);
 
-            var config = Plugin.Instance.Configuration;
-            if (string.IsNullOrEmpty(config.ToAddr))
+            var config = Plugin.Instance?.Configuration;
+            if (config == null || string.IsNullOrEmpty(config.ToAddr))
             {
                 // Optionally log that the email is not sent because the address is not configured
                 return Task.CompletedTask;

@@ -10,17 +10,13 @@ namespace Jellyfin.Plugin.JellyNews.LOGGER;
 /// </summary>
 public class Logger
 {
-    private readonly PluginConfiguration config;
-    private readonly string logFile;
-
-
     /// <summary>
     /// Initializes a new instance of the <see cref="Debug"/> class.
     /// </summary>
     public void Debug(object msg)
     {
-        PluginConfiguration config = Plugin.Instance!.Configuration;
-        if (config.DebugMode)
+        var config = Plugin.Instance?.Configuration;
+        if (config?.DebugMode == true)
         {
             Info(msg);
         }
@@ -57,11 +53,14 @@ public class Logger
     /// <param name="type">Type of warning ("ERR", "WARN", "INFO").</param>
     private void Inform(object msg, string type)
     {
-        var config = Plugin.Instance.Configuration;
-        var logFile = Path.Combine(config.LogDirectoryPath, $"{GetDate()}_JellyNews.log");
-        string logMsgPrefix = $"[NLP]: {GetDateTime()} - [{type}] ";
-        Console.WriteLine($"{logMsgPrefix}{msg}");
-        File.AppendAllText(logFile, $"{logMsgPrefix}{msg}\n");
+        var config = Plugin.Instance?.Configuration;
+        if (config != null)
+        {
+            var logFile = Path.Combine(config.LogDirectoryPath, $"{GetDate()}_JellyNews.log");
+            string logMsgPrefix = $"[NLP]: {GetDateTime()} - [{type}] ";
+            Console.WriteLine($"{logMsgPrefix}{msg}");
+            File.AppendAllText(logFile, $"{logMsgPrefix}{msg}\n");
+        }
     }
 
     private string GetDateTime()

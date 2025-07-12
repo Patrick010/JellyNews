@@ -50,7 +50,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             config.LogDirectoryPath = dataPaths.LogDirectoryPath;
             logger.Info($"LogDirectoryPath: {config.LogDirectoryPath}");
 
-
             // Custom Paths
             config.NewsletterDir = $"{config.TempDirectory}/JellyNews/";
             logger.Info($"NewsletterDir: {config.NewsletterDir}");
