@@ -103,14 +103,17 @@ public class Scraper
             return;
         }
 
+        logger.Debug($"Found {config.EnabledLibraries.Count} enabled libraries.");
         foreach (var libraryId in config.EnabledLibraries)
         {
+            logger.Debug($"Processing library with ID: {libraryId}");
             var library = libManager.GetItemById(libraryId);
             if (library == null)
             {
                 logger.Warn($"Library with ID '{libraryId}' not found.");
                 continue;
             }
+            logger.Debug($"Found library: {library.Name}");
 
             var itemQuery = new InternalItemsQuery
             {
