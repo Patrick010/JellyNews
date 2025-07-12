@@ -1,0 +1,7 @@
+*/.DS_Store
+Jellyfin.Plugin.JellyNews/bin
+Jellyfin.Plugin.JellyNews/obj
+RELEASES
+artifacts
+Jellyfin.Plugin.JellyNews/newsletters/
+*.bak

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JellyNews Configuration</title>
+    <style>
+        :root {
+            /* ===== RESIZING CONTROLS ===== */
+            --collapsed-width: 220px;    /* This will be adjusted by JS */
+            --max-content-width: 800px;   /* Maximum expanded width */
+            --transition-speed: 0.6s;     /* Expand/collapse animation duration */
+            --mobile-breakpoint: 768px;   /* Screen width for mobile layout */
+
+            /* Color scheme */
+            --primary: #00a4dc;
+            --primary-dark: #0078a8;
+            --bg-dark: #0f172a;
+            --bg-darker: #0a1120;
+            --bg-light: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --success: #10b981;
+            --glass: rgba(15, 23, 42, 0.7);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #JellyNewsConfigPage {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .content-primary {
+            background: var(--glass);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Collapsible sections */
+        .DropdownSection {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0;
+            margin-bottom: 20px;
+            background-color: rgba(30, 41, 59, 0.5);
+            transition: 
+                width var(--transition-speed) ease-out,
+                padding var(--transition-speed) ease-out;
+            width: var(--collapsed-width);
+            max-width: var(--max-content-width);
+            overflow: hidden;
+        }
+
+        .DropdownSection[open] {
+            width: 100%;
+            padding: 15px;
+        }
+
+        /* NEW: Adjusted input widths when expanded */
+        .DropdownSection[open] input[is="emby-input"],
+        .DropdownSection[open] select[is="emby-select"],
+        .DropdownSection[open] .template-textarea {
+            width: 97%;
+            max-width: 97%;
+            margin-left: 0;
+        }
+
+        .DropdownSection summary {
+            font-weight: 500;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 12px 15px;
+            outline: none;
+            color: var(--primary);
+            list-style: none;
+            transition: all var(--transition-speed) ease-out;
+            white-space: nowrap;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Input styling */
+        .inputContainer {
+            margin-bottom: 18px;
+        }
+
+        .inputLabel {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        input[is="emby-input"], 
+        select[is="emby-select"] {
+            width: 100%;
+            max-width: 500px;
+            padding: 8px 12px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .template-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Fira Code', monospace;
+            line-height: 1.5;
+        }
+
+        /* Button styling */
+        .raised.emby-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            min-width: 160px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .raised.emby-button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Button containers */
+        #ServerDetailsSection .button-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 25px;
+        }
+
+        form > .button-container:last-child {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="JellyNewsConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="JellyNewsConfigForm">
+                    <h2>JellyNews Configuration</h2>
+                    
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="DebugMode" name="DebugMode" type="checkbox" is="emby-checkbox" />
+                            <span>Debug Mode</span>
+                        </label>
+                    </div>
+                    
+                    <div id="OutboundEmailDetails">
+                        <h3>Email Settings</h3>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="ToAddr">To Address</label>
+                            <input id="ToAddr" name="ToAddr" type="text" is="emby-input" />
+                            <div class="fieldDescription">Recipient's email to receive JellyNews. Separate multiple addresses with commas</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="FromAddr">From Address</label>
+                            <input id="FromAddr" name="FromAddr" type="text" is="emby-input" />
+                            <div class="fieldDescription">The address that JellyNews will come from</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="Subject">Subject</label>
+                            <input id="Subject" name="Subject" type="text" is="emby-input" />
+                            <div class="fieldDescription">Subject field (Default: 'Jellyfin JellyNews')</div>
+                        </div>
+                    </div>
+                    
+                    <div id="LibrarySelection">
+                        <h3>Content Selection</h3>
+                        <p>Select libraries to include in JellyNews:</p>
+                        <div id="libraryCheckboxesContainer">
+                            <!-- Library checkboxes will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <details id="HtmlFormattingSection" class="DropdownSection">
+                        <summary>HTML Formatting</summary>
+                        <div class="section-content">
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="Body">Body Template</label>
+                                <div class="fieldDescription">
+                                    Available variables: <code>{Date}</code> <code>{EntryData}</code>
+                                </div>
+                                <textarea id="Body" name="Body" dataname="Body" class="template-textarea"></textarea>
+                            </div>
+                            
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="Entry">Entry Template</label>
+                                <div class="fieldDescription">
+                                    Available variables: <code>{ImageURL}</code> <code>{Title}</code> <code>{SeasonEpsInfo}</code> <code>{SeriesOverview}</code>
+                                </div>
+                                <textarea id="Entry" name="Entry" dataname="Entry" class="template-textarea"></textarea>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details id="ScraperConfigSection" class="DropdownSection">
+                        <summary>Scraper Configuration</summary>
+                        <div class="section-content">
+                            <div class="selectContainer">
+                                <label class="inputLabel" for="HostingSelector">Poster Hosting Type</label>
+                                <select is="emby-select" id="HostingSelector" name="HostingSelector" class="emby-select-withcolor emby-select">
+                                    <option id="defaultImgur" value="Imgur">Imgur (Default)</option>
+                                    <option id="localJFHosting" value="JfHosting">Local JF Hosting</option>
+                                </select>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div id="Imgur" name="options">
+                                <div class="inputContainer">
+                                    <label class="inputLabel" for="ApiKey">Imgur API Key</label>
+                                    <input id="ApiKey" name="ApiKey" type="text" is="emby-input" />
+                                    <div class="fieldDescription">Required for image uploading. <a href="https://dev.to/bearer/how-to-configure-the-imgur-api-2ap9" target="_blank">Get API key</a></div>
+                                </div>
+                            </div>
+                            
+                            <div id="JfHosting" name="options">
+                                <div class="inputContainer">
+                                    <label class="inputLabel" for="Hostname">Hostname</label>
+                                    <input id="Hostname" name="Hostname" type="text" is="emby-input" />
+                                    <div class="fieldDescription">
+                                        Example: <code>https://myserver.com:8096</code> (no trailing slash)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details id="ServerDetailsSection" class="DropdownSection">
+                        <summary>SMTP Configuration</summary>
+                        <div class="section-content">
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="SMTPServer">SMTP Server</label>
+                                <input id="SMTPServer" name="SMTPServerName" type="text" is="emby-input" />
+                                <div class="fieldDescription">e.g. smtp.gmail.com</div>
+                            </div>
+                            
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="SMTPPort">SMTP Port</label>
+                                <input id="SMTPPort" name="SMTPPortNum" type="number" is="emby-input" min="0" />
+                                <div class="fieldDescription">e.g. 587</div>
+                            </div>
+                            
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="SMTPUser">Username</label>
+                                <input id="SMTPUser" name="SMTPUsername" type="text" is="emby-input" />
+                            </div>
+                            
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="SMTPPass">Password</label>
+                                <input id="SMTPPass" name="SMTPPassword" type="password" is="emby-input" />
+                            </div>
+                            
+                            <div class="button-container">
+                                <button id="testButton" is="emby-button" type="button" class="raised emby-button">
+                                    Send Test Email
+                                </button>
+                            </div>
+                        </div>
+                    </details>
+                    
+                    <div class="button-container">
+                        <button is="emby-button" type="submit" class="raised emby-button">
+                            Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // ===== MINIMAL WIDTH RESIZING =====
+            const EXTRA_PADDING = 30; // Reduced from 40px to make more compact
+            const MOBILE_BREAKPOINT = 768;
+
+            function setupSectionSizing() {
+                const sections = document.querySelectorAll('.DropdownSection');
+                let maxWidth = 0;
+                
+                // Create precise measurement element
+                const measurer = document.createElement('div');
+                measurer.style.position = 'absolute';
+                measurer.style.visibility = 'hidden';
+                measurer.style.whiteSpace = 'nowrap';
+                measurer.style.fontFamily = 'Inter, sans-serif';
+                measurer.style.fontWeight = '500';
+                measurer.style.fontSize = '15px';
+                document.body.appendChild(measurer);
+                
+                // Calculate exact maximum text width
+                sections.forEach(section => {
+                    const summary = section.querySelector('summary');
+                    measurer.textContent = summary.textContent;
+                    maxWidth = Math.max(maxWidth, measurer.offsetWidth);
+                });
+                
+                document.body.removeChild(measurer);
+                
+                // Apply minimal width based on longest title
+                document.documentElement.style.setProperty(
+                    '--collapsed-width', 
+                    `${maxWidth + EXTRA_PADDING}px`
+                );
+                
+                // Original mobile handling
+                function updateForScreenSize() {
+                    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+                    sections.forEach(s => {
+                        s.style.width = isMobile ? '100%' : '';
+                    });
+                }
+                
+                window.addEventListener('resize', updateForScreenSize);
+                updateForScreenSize();
+            }
+
+            // Original configuration logic
+            document.addEventListener('DOMContentLoaded', function() {
+                setupSectionSizing();
+                
+                var JellyNewsConfig = {
+                    pluginUniqueId: '60f478ab-2dd6-4ea0-af10-04d033f75979'
+                };
+
+                function hideScraperConfig() {
+                    let options = document.getElementsByName("options");
+                    options.forEach((option) => {
+                        option.style.display = 'none';
+                    });
+                }
+
+                function showScraperConfig(id) {
+                    document.getElementById(id).style.display = 'block';
+                }
+                
+                function saveConfig() {
+                    ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
+                        config.DebugMode = document.querySelector('#DebugMode').checked;
+                        config.SMTPServer = document.querySelector('#SMTPServer').value;
+                        config.SMTPPort = document.querySelector('#SMTPPort').value;
+                        config.SMTPUser = document.querySelector('#SMTPUser').value;
+                        config.SMTPPass = document.querySelector('#SMTPPass').value;
+                        config.ToAddr = document.querySelector('#ToAddr').value;
+                        config.FromAddr = document.querySelector('#FromAddr').value;
+                        config.Subject = document.querySelector('#Subject').value;
+                        config.Body = document.querySelector('#Body').value;
+                        config.Entry = document.querySelector('#Entry').value;
+                        
+                        config.SelectedLibraryIds = [];
+                        const libraryCheckboxes = document.querySelectorAll('#libraryCheckboxesContainer input[type="checkbox"]');
+                        libraryCheckboxes.forEach(function(checkbox) {
+                            if (checkbox.checked) {
+                                config.SelectedLibraryIds.push(checkbox.value);
+                            }
+                        });
+                        
+                        config.PHType = document.querySelector('#HostingSelector').value;
+                        config.ApiKey = document.querySelector('#ApiKey').value;
+                        config.Hostname = document.querySelector('#Hostname').value;
+
+                        ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, config).then(function (result) {
+                            Dashboard.processPluginConfigurationUpdateResult(result);
+                        });
+                    });
+                }
+
+                function loadConfig() {
+                    ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
+                        document.querySelector('#DebugMode').checked = config.DebugMode;
+                        document.querySelector('#SMTPServer').value = config.SMTPServer;
+                        document.querySelector('#SMTPPort').value = config.SMTPPort;
+                        document.querySelector('#SMTPUser').value = config.SMTPUser;
+                        document.querySelector('#SMTPPass').value = config.SMTPPass;
+                        document.querySelector('#ToAddr').value = config.ToAddr;
+                        document.querySelector('#FromAddr').value = config.FromAddr;
+                        document.querySelector('#Subject').value = config.Subject;
+                        document.querySelector('#Body').value = config.Body;
+                        document.querySelector('#Entry').value = config.Entry;
+
+                        const libraryCheckboxesContainer = document.querySelector('#libraryCheckboxesContainer');
+                        libraryCheckboxesContainer.innerHTML = '';
+
+                        ApiClient.getUserViews({}, ApiClient.getCurrentUserId()).then(function(userViewsResult) {
+                            if (userViewsResult && userViewsResult.Items) {
+                                userViewsResult.Items.forEach(function(library) {
+                                    const checkbox = document.createElement('input');
+                                    checkbox.type = 'checkbox';
+                                    checkbox.id = 'lib_' + library.Id;
+                                    checkbox.name = library.Name;
+                                    checkbox.value = library.Id;
+                                    checkbox.is = 'emby-checkbox';
+
+                                    const label = document.createElement('label');
+                                    label.htmlFor = checkbox.id;
+                                    label.className = 'emby-checkbox-label';
+                                    label.appendChild(checkbox);
+                                    label.appendChild(document.createTextNode(library.Name));
+
+                                    const div = document.createElement('div');
+                                    div.className = 'checkboxContainer';
+                                    div.appendChild(label);
+                                    libraryCheckboxesContainer.appendChild(div);
+
+                                    if (config.SelectedLibraryIds && config.SelectedLibraryIds.includes(library.Id)) {
+                                        checkbox.checked = true;
+                                    }
+                                });
+                            }
+                        });
+
+                        document.querySelector('#HostingSelector').value = config.PHType;
+                        hideScraperConfig();
+                        showScraperConfig(config.PHType);
+                        document.querySelector('#ApiKey').value = config.ApiKey;
+                        document.querySelector('#Hostname').value = config.Hostname;
+
+                        Dashboard.hideLoadingMsg();
+                    });
+                }
+
+                document.querySelector('#JellyNewsConfigPage')
+                    .addEventListener('pageshow', function() {
+                        Dashboard.showLoadingMsg();
+                        loadConfig();
+                    });
+
+                document.querySelector('#JellyNewsConfigForm')
+                    .addEventListener('submit', function(e) {
+                    Dashboard.showLoadingMsg();
+                    saveConfig();
+                    e.preventDefault();
+                    return false;
+                });
+
+                document.querySelector('#testButton')
+                    .addEventListener('click', function(e) {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
+                        let url = ApiClient.getUrl('Smtp/SendTestMail');
+                        let data = JSON.stringify(config);
+                        ApiClient.ajax({ type: 'POST', url, data, contentType: 'application/json' });
+                    });
+                    Dashboard.hideLoadingMsg();
+                    alert("Test email sent!");
+                    e.preventDefault();
+                    return false;
+                });
+
+                document.querySelector('#HostingSelector')
+                    .addEventListener('change', function() {
+                    hideScraperConfig();
+                    showScraperConfig(this.value);
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
