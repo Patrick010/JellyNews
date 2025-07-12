@@ -63,12 +63,14 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
+        var namespacee = GetType().Namespace;
+        logger.Info($"Plugin Namespace: {namespacee}");
         return new[]
         {
             new PluginPageInfo
             {
-                Name = this.Name,
-                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
+                Name = Name,
+                EmbeddedResourcePath = $"{namespacee}.Configuration.configPage.html"
             }
         };
     }
