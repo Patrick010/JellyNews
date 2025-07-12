@@ -119,14 +119,17 @@ public class SQLiteDatabase
 
                 foreach (KeyValuePair<string, string> col in new_cols)
                 {
-                    try
+                    if (!ColumnExists(table, col.Key))
                     {
-                        logger.Debug($"Adding Table Columns for DB updates...");
-                        ExecuteSQL($"ALTER TABLE {table} ADD COLUMN {col.Key} {col.Value};");
-                    }
-                    catch (SQLiteException sle)
-                    {
-                        logger.Warn(sle);
+                        try
+                        {
+                            logger.Debug($"Adding Table Columns for DB updates...");
+                            ExecuteSQL($"ALTER TABLE {table} ADD COLUMN {col.Key} {col.Value};");
+                        }
+                        catch (SQLiteException sle)
+                        {
+                            logger.Warn(sle);
+                        }
                     }
                 }
             }
@@ -136,6 +139,26 @@ public class SQLiteDatabase
         {
             logger.Debug("Running Query: " + query);
             return _db.Query(query);
+        }
+
+        private bool ColumnExists(string tableName, string columnName)
+        {
+            try
+            {
+                var result = Query($"PRAGMA table_info({tableName})");
+                foreach (var row in result)
+                {
+                    if (row[1].ToString() == columnName)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         // private IStatement PrepareStatement(string query)
