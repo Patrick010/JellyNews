@@ -28,6 +28,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         Instance = this;
         logger = new Logger();
+        logger.Info("JellyNews Plugin constructor called.");
 
         void SetConfigPaths(IApplicationPaths dataPaths)
         {
@@ -35,18 +36,28 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             // IApplication Paths
             PluginConfiguration config = Plugin.Instance!.Configuration;
             config.DataPath = dataPaths.DataPath;
+            logger.Info($"DataPath: {config.DataPath}");
             config.TempDirectory = dataPaths.TempDirectory;
+            logger.Info($"TempDirectory: {config.TempDirectory}");
             config.PluginsPath = dataPaths.PluginsPath;
+            logger.Info($"PluginsPath: {config.PluginsPath}");
             config.ProgramDataPath = dataPaths.ProgramDataPath;
+            logger.Info($"ProgramDataPath: {config.ProgramDataPath}");
             config.ProgramSystemPath = dataPaths.ProgramSystemPath;
+            logger.Info($"ProgramSystemPath: {config.ProgramSystemPath}");
             config.SystemConfigurationFilePath = dataPaths.SystemConfigurationFilePath;
+            logger.Info($"SystemConfigurationFilePath: {config.SystemConfigurationFilePath}");
             config.LogDirectoryPath = dataPaths.LogDirectoryPath;
+            logger.Info($"LogDirectoryPath: {config.LogDirectoryPath}");
+
 
             // Custom Paths
             config.NewsletterDir = $"{config.TempDirectory}/JellyNews/";
+            logger.Info($"NewsletterDir: {config.NewsletterDir}");
         }
 
         SetConfigPaths(applicationPaths);
+        logger.Info("JellyNews Plugin constructor finished.");
     }
 
     /// <inheritdoc />
@@ -63,14 +74,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
+        logger.Info("GetPages method called.");
         var namespacee = GetType().Namespace;
         logger.Info($"Plugin Namespace: {namespacee}");
+        var embeddedResourcePath = $"{namespacee}.Configuration.configPage.html";
+        logger.Info($"Embedded Resource Path: {embeddedResourcePath}");
         return new[]
         {
             new PluginPageInfo
             {
                 Name = Name,
-                EmbeddedResourcePath = $"{namespacee}.Configuration.configPage.html"
+                EmbeddedResourcePath = embeddedResourcePath
             }
         };
     }
