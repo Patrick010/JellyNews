@@ -66,21 +66,23 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
                 return Task.CompletedTask;
             }
 
-            config.AvailableLibraries.Clear();
             foreach (var library in libraries)
             {
                 if (library is Folder folder)
                 {
-                    _logger.LogInformation("[JellyNews] Found library: {Name} with Id: {Id}", folder.Name, folder.Id);
-
-                    config.AvailableLibraries.Add(new LibraryInfo
+                    if (!config.AvailableLibraries.Any(l => l.Id == folder.Id.ToString()))
                     {
-                        Name = folder.Name,
-                        Id = folder.Id.ToString(),
-                        ContentType = folder.GetClientTypeName()
-                    });
+                        _logger.LogInformation("[JellyNews] Found new library: {Name} with Id: {Id}", folder.Name, folder.Id);
 
-                    _logger.LogInformation("[JellyNews] Added library {Name} to available libraries", folder.Name);
+                        config.AvailableLibraries.Add(new LibraryInfo
+                        {
+                            Name = folder.Name,
+                            Id = folder.Id.ToString(),
+                            ContentType = folder.GetClientTypeName()
+                        });
+
+                        _logger.LogInformation("[JellyNews] Added library {Name} to available libraries", folder.Name);
+                    }
                 }
             }
 
