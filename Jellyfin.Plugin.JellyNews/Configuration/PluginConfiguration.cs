@@ -1,57 +1,37 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using MediaBrowser.Model.Plugins;
 
-namespace Jellyfin.Plugin.JellyNews.Configuration;
-
-/// <summary>
-/// The configuration options.
-/// </summary>
-public enum SomeOptions
+namespace Jellyfin.Plugin.JellyNews.Configuration
 {
     /// <summary>
-    /// Option one.
+    /// Plugin configuration.
     /// </summary>
-    OneOption,
-
-    /// <summary>
-    /// Second option.
-    /// </summary>
-    AnotherOption
-}
-
-/// <summary>
-/// Plugin configuration.
-/// </summary>
-public class PluginConfiguration : BasePluginConfiguration
-{
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
-    /// </summary>
-    public PluginConfiguration()
+    public class PluginConfiguration : BasePluginConfiguration
     {
-        // set default options here
-        Options = SomeOptions.AnotherOption;
-        TrueFalseSetting = true;
-        AnInteger = 2;
-        AString = "string";
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
+        /// </summary>
+        public PluginConfiguration()
+        {
+            SelectedLibraryIds = new Collection<string>();
+            AvailableLibraries = new Collection<LibraryInfo>();
+            LoggingLevel = LogLevel.Debug;
+        }
+
+        /// <summary>
+        /// Gets the selected library ids.
+        /// </summary>
+        public Collection<string> SelectedLibraryIds { get; }
+
+        /// <summary>
+        /// Gets the available libraries.
+        /// </summary>
+        public Collection<LibraryInfo> AvailableLibraries { get; }
+
+        /// <summary>
+        /// Gets or sets the logging level.
+        /// </summary>
+        public LogLevel LoggingLevel { get; set; }
     }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether some true or false setting is enabled..
-    /// </summary>
-    public bool TrueFalseSetting { get; set; }
-
-    /// <summary>
-    /// Gets or sets an integer setting.
-    /// </summary>
-    public int AnInteger { get; set; }
-
-    /// <summary>
-    /// Gets or sets a string setting.
-    /// </summary>
-    public string AString { get; set; }
-
-    /// <summary>
-    /// Gets or sets an enum option.
-    /// </summary>
-    public SomeOptions Options { get; set; }
 }

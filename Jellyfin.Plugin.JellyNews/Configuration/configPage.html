@@ -1,37 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="utf-8">
     <title>JellyNews</title>
 </head>
+
 <body>
-    <div id="JellyNewsConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+    <div id="JellyNewsConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
+        data-require="emby-input,emby-button,emby-select,emby-checkbox">
         <div data-role="content">
             <div class="content-primary">
                 <form id="JellyNewsConfigForm">
+
                     <div class="selectContainer">
-                        <label class="selectLabel" for="Options">Several Options</label>
-                        <select is="emby-select" id="Options" name="Options" class="emby-select-withcolor emby-select">
-                            <option id="optOneOption" value="OneOption">One Option</option>
-                            <option id="optAnotherOption" value="AnotherOption">Another Option</option>
+                        <label class="selectLabel" for="selectLoggingLevel">Log Level</label>
+                        <select is="emby-select" id="selectLoggingLevel" name="selectLoggingLevel"
+                            class="emby-select-withcolor emby-select">
+                            <option value="Trace">Trace</option>
+                            <option value="Debug">Debug</option>
+                            <option value="Information">Information</option>
+                            <option value="Warning">Warning</option>
+                            <option value="Error">Error</option>
+                            <option value="Critical">Critical</option>
                         </select>
                     </div>
-                    <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="AnInteger">An Integer</label>
-                        <input id="AnInteger" name="AnInteger" type="number" is="emby-input" min="0" />
-                        <div class="fieldDescription">A Description</div>
+
+                    <br />
+                    <br />
+
+                    <div id="librarySelection">
+                        <h2>Select Libraries to Scan</h2>
                     </div>
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label class="emby-checkbox-label">
-                            <input id="TrueFalseSetting" name="TrueFalseCheckBox" type="checkbox" is="emby-checkbox" />
-                            <span>A Checkbox</span>
-                        </label>
-                    </div>
-                    <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="AString">A String</label>
-                        <input id="AString" name="AString" type="text" is="emby-input" />
-                        <div class="fieldDescription">Another Description</div>
-                    </div>
+
+                    <br />
+
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
                             <span>Save</span>
@@ -40,40 +42,74 @@
                 </form>
             </div>
         </div>
-        <script type="text/javascript">
+
+        <script>
             var JellyNewsConfig = {
-                pluginUniqueId: 'eb5d7894-8eef-4b36-aa6f-5d124e828ce1'
+                pluginUniqueId: 'a7757465-2526-45fb-99c1-6464949dc189'
             };
 
-            document.querySelector('#JellyNewsConfigPage')
-                .addEventListener('pageshow', function() {
-                    Dashboard.showLoadingMsg();
-                    ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
-                        document.querySelector('#Options').value = config.Options;
-                        document.querySelector('#AnInteger').value = config.AnInteger;
-                        document.querySelector('#TrueFalseSetting').checked = config.TrueFalseSetting;
-                        document.querySelector('#AString').value = config.AString;
-                        Dashboard.hideLoadingMsg();
-                    });
-                });
-
-            document.querySelector('#JellyNewsConfigForm')
-                .addEventListener('submit', function(e) {
+            function loadConfig(page) {
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
-                    config.Options = document.querySelector('#Options').value;
-                    config.AnInteger = document.querySelector('#AnInteger').value;
-                    config.TrueFalseSetting = document.querySelector('#TrueFalseSetting').checked;
-                    config.AString = document.querySelector('#AString').value;
+
+                    // Create library checkboxes
+                    if (config.AvailableLibraries) {
+                        var librarySelection = document.querySelector('#librarySelection');
+                        config.AvailableLibraries.forEach(function (library) {
+                            var checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.id = library.Id;
+                            checkbox.name = 'selectedLibraries';
+                            checkbox.value = library.Id;
+                            checkbox.checked = config.SelectedLibraryIds.includes(library.Id);
+
+                            var label = document.createElement('label');
+                            label.htmlFor = library.Id;
+                            label.appendChild(document.createTextNode(library.Name + ' (' + library.ContentType + ')'));
+
+                            var container = document.createElement('div');
+                            container.appendChild(checkbox);
+                            container.appendChild(label);
+                            librarySelection.appendChild(container);
+                        });
+                    }
+
+                    // Set log level
+                    page.querySelector('#selectLoggingLevel').value = config.LoggingLevel;
+
+                    Dashboard.hideLoadingMsg();
+                });
+            }
+
+            document.querySelector('#JellyNewsConfigPage').addEventListener('pageshow', function () {
+                loadConfig(this);
+            });
+
+            document.querySelector('#JellyNewsConfigForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
+
+                    // Save selected libraries
+                    var selectedLibraries = [];
+                    var checkboxes = document.querySelectorAll('input[name="selectedLibraries"]:checked');
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        selectedLibraries.push(checkboxes[i].value);
+                    }
+                    config.SelectedLibraryIds = selectedLibraries;
+
+                    // Save log level
+                    config.LoggingLevel = document.querySelector('#selectLoggingLevel').value;
+
                     ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);
                     });
                 });
-
-                e.preventDefault();
                 return false;
             });
+
         </script>
     </div>
 </body>
+
 </html>
