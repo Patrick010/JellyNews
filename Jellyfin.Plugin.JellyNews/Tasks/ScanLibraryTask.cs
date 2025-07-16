@@ -17,7 +17,7 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
     /// </summary>
     public class ScanLibraryTask : IScheduledTask
     {
-        private readonly ILogger<ScanLibraryTask> _logger;
+        private readonly ILogger _logger;
         private readonly ILibraryManager _libraryManager;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="libraryManager">The library manager.</param>
-        public ScanLibraryTask(ILogger<ScanLibraryTask> logger, ILibraryManager libraryManager)
+        public ScanLibraryTask(ILogger logger, ILibraryManager libraryManager)
         {
             _logger = logger;
             _libraryManager = libraryManager;

@@ -38,8 +38,6 @@ namespace Jellyfin.Plugin.JellyNews
             Instance = this;
             _loggerFactory = loggerFactory;
             _libraryManager = libraryManager;
-            _scanLibraryTask = new ScanLibraryTask(_loggerFactory.CreateLogger<ScanLibraryTask>(), _libraryManager);
-
             var logFilePath = Path.Combine(applicationPaths.LogDirectoryPath, "JellyNews.log");
             var logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -48,6 +46,8 @@ namespace Jellyfin.Plugin.JellyNews
             _loggerFactory.AddSerilog(logger);
             _logger = _loggerFactory.CreateLogger<Plugin>();
             _logger.LogInformation("JellyNews Plugin started.");
+
+            _scanLibraryTask = new ScanLibraryTask(_logger, _libraryManager);
         }
 
         /// <inheritdoc />
