@@ -99,10 +99,19 @@
                     config.SelectedLibraryIds = selectedLibraries;
 
                     // Save log level
-                    config.LoggingLevel = document.querySelector('#selectLoggingLevel').value;
+                    var logLevel = document.querySelector('#selectLoggingLevel').value;
+                    config.LoggingLevel = logLevel;
 
                     ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);
+                    });
+
+                    // Set log level
+                    ApiClient.ajax({
+                        type: "POST",
+                        url: "/jellynews/loglevel",
+                        contentType: 'application/json',
+                        data: JSON.stringify(logLevel)
                     });
                 });
                 return false;

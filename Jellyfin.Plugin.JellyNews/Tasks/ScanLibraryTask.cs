@@ -17,17 +17,14 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
     /// </summary>
     public class ScanLibraryTask : IScheduledTask
     {
-        private readonly ILogger _logger;
         private readonly ILibraryManager _libraryManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScanLibraryTask"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
         /// <param name="libraryManager">The library manager.</param>
-        public ScanLibraryTask(ILogger logger, ILibraryManager libraryManager)
+        public ScanLibraryTask(ILibraryManager libraryManager)
         {
-            _logger = logger;
             _libraryManager = libraryManager;
         }
 
@@ -58,7 +55,7 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
         /// <inheritdoc />
         public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("ScanLibraryTask Started");
+            Plugin.Log?.Information("ScanLibraryTask Started");
             var libraries = _libraryManager.GetUserRootFolder().Children.ToArray();
             var config = Plugin.Instance?.Configuration;
             if (config == null)
@@ -71,7 +68,7 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
             {
                 if (library is Folder folder)
                 {
-                    _logger.LogInformation("Found library: {Name} with Id: {Id}", folder.Name, folder.Id);
+                    Plugin.Log?.Information("Found library: {Name} with Id: {Id}", folder.Name, folder.Id);
 
                     config.AvailableLibraries.Add(new LibraryInfo
                     {
@@ -80,12 +77,12 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
                         ContentType = folder.GetClientTypeName()
                     });
 
-                    _logger.LogInformation("Added library {Name} to available libraries", folder.Name);
+                    Plugin.Log?.Information("Added library {Name} to available libraries", folder.Name);
                 }
             }
 
             Plugin.Instance?.UpdateConfiguration(config);
-            _logger.LogInformation("ScanLibraryTask Finished");
+            Plugin.Log?.Information("ScanLibraryTask Finished");
             progress.Report(100);
             return Task.CompletedTask;
         }

@@ -16,7 +16,6 @@ namespace Jellyfin.Plugin.JellyNews.Configuration
         {
             SelectedLibraryIds = new Collection<string>();
             AvailableLibraries = new Collection<LibraryInfo>();
-            LoggingLevel = LogLevel.Debug;
         }
 
         /// <summary>
@@ -28,10 +27,5 @@ namespace Jellyfin.Plugin.JellyNews.Configuration
         /// Gets the available libraries.
         /// </summary>
         public Collection<LibraryInfo> AvailableLibraries { get; }
-
-        /// <summary>
-        /// Gets or sets the logging level.
-        /// </summary>
-        public LogLevel LoggingLevel { get; set; }
     }
 }

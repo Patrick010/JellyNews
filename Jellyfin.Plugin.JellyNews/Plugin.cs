@@ -10,64 +10,73 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using MediaBrowser.Model.Tasks;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Core;
+using Serilog.Events;
 
 namespace Jellyfin.Plugin.JellyNews
 {
     /// <summary>
-    /// The main plugin.
+    /// Root plugin class with its own Serilog instance that writes to jellynews.log.
     /// </summary>
-    public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
+    public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
-        private readonly ILogger<Plugin> _logger;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ILibraryManager _libraryManager;
-        private readonly ScanLibraryTask _scanLibraryTask;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Plugin"/> class.
-        /// </summary>
-        /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
-        /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-        /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="libraryManager">The library manager.</param>
-        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILoggerFactory loggerFactory, ILibraryManager libraryManager)
-            : base(applicationPaths, xmlSerializer)
-        {
-            Instance = this;
-            _loggerFactory = loggerFactory;
-            _libraryManager = libraryManager;
-            var logFilePath = Path.Combine(applicationPaths.LogDirectoryPath, "JellyNews.log");
-            var logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day, formatProvider: CultureInfo.InvariantCulture)
-                .CreateLogger();
-            _loggerFactory.AddSerilog(logger);
-            _logger = _loggerFactory.CreateLogger<Plugin>();
-            _logger.LogInformation("JellyNews Plugin started.");
-
-            var serilogLogger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day, formatProvider: CultureInfo.InvariantCulture)
-                .CreateLogger();
-
-            var serilogLoggerFactory = new Serilog.Extensions.Logging.SerilogLoggerFactory(serilogLogger);
-
-            _scanLibraryTask = new ScanLibraryTask(serilogLoggerFactory.CreateLogger<ScanLibraryTask>(), _libraryManager);
-        }
-
         /// <inheritdoc />
         public override string Name => "JellyNews";
+
+        private readonly ILibraryManager _libraryManager;
+        private readonly ScanLibraryTask _scanLibraryTask;
+        private static readonly Serilog.Core.LoggingLevelSwitch _levelSwitch =
+            new(LogEventLevel.Information);
 
         /// <inheritdoc />
         public override Guid Id => Guid.Parse("a7757465-2526-45fb-99c1-6464949dc189");
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Plugin"/> class.
+        /// </summary>
+        /// <param name="paths">The paths.</param>
+        /// <param name="xmlSerializer">The xml serializer.</param>
+        /// <param name="libraryManager">The library manager.</param>
+        public Plugin(IApplicationPaths paths, IXmlSerializer xmlSerializer, ILibraryManager libraryManager) : base(paths, xmlSerializer)
+        {
+            Instance = this;
+            _libraryManager = libraryManager;
+            _scanLibraryTask = new ScanLibraryTask(_libraryManager);
+            var logFile = Path.Combine(paths.LogDirectoryPath, "jellynews.log");
+
+            Log = new LoggerConfiguration()
+                .MinimumLevel.ControlledBy(_levelSwitch)
+                .WriteTo.File(
+                    logFile,
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 14,
+                    buffered: true,
+                    flushToDiskInterval: TimeSpan.FromSeconds(5),
+                    formatProvider: CultureInfo.InvariantCulture)
+                .CreateLogger();
+
+            Log.Information("JellyNews logger initialised → {LogFile}", logFile);
+        }
+
+        /// <summary>
+        /// Gets the global logger for the entire plugin.
+        /// </summary>
+        internal static ILogger? Log { get; private set; }
+
+        /// <summary>
         /// Gets the current plugin instance.
         /// </summary>
         public static Plugin? Instance { get; private set; }
+
+        /// <summary>
+        /// Allow admin UI or env‑var to flip verbosity: Debug, Information, Warning.
+        /// </summary>
+        /// <param name="level">The new log level.</param>
+        public static void SetLogLevel(LogEventLevel level)
+        {
+            _levelSwitch.MinimumLevel = level;
+            Log?.Information("Log level switched to {Level}", level);
+        }
 
         /// <inheritdoc />
         public IEnumerable<PluginPageInfo> GetPages()
