@@ -37,10 +37,6 @@
                     </div>
                 </form>
 
-                <div id="debug" style="margin-top: 2em;">
-                    <h2>Debug Info</h2>
-                    <pre id="debug-output"></pre>
-                </div>
             </div>
         </div>
 
@@ -111,8 +107,6 @@
 
                 // Save log level
                 currentConfig.LogLevel = document.querySelector('#selectLogLevel').value;
-
-                document.querySelector('#debug-output').textContent = JSON.stringify(currentConfig, null, 2);
 
                 Dashboard.showLoadingMsg();
                 ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, currentConfig).then(function (result) {
