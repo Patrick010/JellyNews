@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using Jellyfin.Plugin.JellyNews.Configuration;
 using Jellyfin.Plugin.JellyNews.Tasks;
 using MediaBrowser.Common.Configuration;
@@ -10,6 +11,7 @@ using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Jellyfin.Plugin.JellyNews
 {
@@ -18,6 +20,7 @@ namespace Jellyfin.Plugin.JellyNews
     /// </summary>
     public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
+        private readonly ILogger<Plugin> _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILibraryManager _libraryManager;
         private readonly ScanLibraryTask _scanLibraryTask;
@@ -35,6 +38,15 @@ namespace Jellyfin.Plugin.JellyNews
             Instance = this;
             _loggerFactory = loggerFactory;
             _libraryManager = libraryManager;
+
+            var logFilePath = Path.Combine(applicationPaths.LogDirectoryPath, "JellyNews.log");
+            var logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day, formatProvider: CultureInfo.InvariantCulture)
+                .CreateLogger();
+            _loggerFactory.AddSerilog(logger);
+            _logger = _loggerFactory.CreateLogger<Plugin>();
+
             _scanLibraryTask = new ScanLibraryTask(_loggerFactory.CreateLogger<ScanLibraryTask>(), _libraryManager);
         }
 

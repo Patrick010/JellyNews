@@ -79,6 +79,8 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
                         Id = folder.Id.ToString(),
                         ContentType = folder.GetClientTypeName()
                     });
+
+                    _logger.LogInformation("Added library {Name} to available libraries", folder.Name);
                 }
             }
 
