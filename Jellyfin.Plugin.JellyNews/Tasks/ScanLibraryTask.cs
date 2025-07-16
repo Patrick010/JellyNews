@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.JellyNews.Configuration;
+using Jellyfin.Plugin.JellyNews.Logging;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.JellyNews.Tasks
 {
@@ -17,18 +17,17 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
     /// </summary>
     public class ScanLibraryTask : IScheduledTask
     {
-        private readonly ILogger<ScanLibraryTask> _logger;
         private readonly ILibraryManager _libraryManager;
+        private readonly Logger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScanLibraryTask"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
         /// <param name="libraryManager">The library manager.</param>
-        public ScanLibraryTask(ILogger<ScanLibraryTask> logger, ILibraryManager libraryManager)
+        public ScanLibraryTask(ILibraryManager libraryManager)
         {
-            _logger = logger;
             _libraryManager = libraryManager;
+            _logger = new Logger();
         }
 
         /// <inheritdoc />
@@ -58,11 +57,12 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
         /// <inheritdoc />
         public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("[JellyNews] ScanLibraryTask Started");
+            _logger.Log(LogLevel.Information, "ScanLibraryTask Started");
             var libraries = _libraryManager.GetUserRootFolder().Children.ToArray();
             var config = Plugin.Instance?.Configuration;
             if (config == null)
             {
+                _logger.Log(LogLevel.Warning, "Plugin configuration is null. Skipping library scan.");
                 return Task.CompletedTask;
             }
 
@@ -72,7 +72,7 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
                 {
                     if (!config.AvailableLibraries.Any(l => l.Id == folder.Id.ToString()))
                     {
-                        _logger.LogInformation("[JellyNews] Found new library: {Name} with Id: {Id}", folder.Name, folder.Id);
+                        _logger.Log(LogLevel.Information, $"Found new library: {folder.Name} with Id: {folder.Id}");
 
                         config.AvailableLibraries.Add(new LibraryInfo
                         {
@@ -81,13 +81,13 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
                             ContentType = folder.GetClientTypeName()
                         });
 
-                        _logger.LogInformation("[JellyNews] Added library {Name} to available libraries", folder.Name);
+                        _logger.Log(LogLevel.Information, $"Added library {folder.Name} to available libraries");
                     }
                 }
             }
 
             Plugin.Instance?.UpdateConfiguration(config);
-            _logger.LogInformation("[JellyNews] ScanLibraryTask Finished");
+            _logger.Log(LogLevel.Information, "ScanLibraryTask Finished");
             progress.Report(100);
             return Task.CompletedTask;
         }

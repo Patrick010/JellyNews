@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Jellyfin.Plugin.JellyNews.Configuration;
+using Jellyfin.Plugin.JellyNews.Logging;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -14,6 +15,8 @@ namespace Jellyfin.Plugin.JellyNews;
 /// </summary>
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
+    private readonly Logger _logger;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
     /// </summary>
@@ -23,6 +26,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
+        _logger = new Logger();
+        ApplicationPaths = applicationPaths;
     }
 
     /// <inheritdoc />
@@ -36,9 +41,15 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     public static Plugin? Instance { get; private set; }
 
+    /// <summary>
+    /// Gets the application paths.
+    /// </summary>
+    public new IApplicationPaths ApplicationPaths { get; }
+
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
+        _logger.Log(LogLevel.Information, "Getting plugin pages");
         return
         [
             new PluginPageInfo
