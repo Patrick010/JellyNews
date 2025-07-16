@@ -44,13 +44,16 @@
                 pluginUniqueId: 'a7757465-2526-45fb-99c1-6464949dc189'
             };
 
+            let currentConfig;
+
             function loadConfig(page) {
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
-
+                    currentConfig = config;
                     // Create library checkboxes
                     if (config.AvailableLibraries) {
                         var librarySelection = document.querySelector('#librarySelection');
+                        librarySelection.innerHTML = '';
                         config.AvailableLibraries.forEach(function (library) {
                             var checkbox = document.createElement('input');
                             checkbox.type = 'checkbox';
@@ -88,28 +91,27 @@
             document.querySelector('#JellyNewsConfigForm').addEventListener('submit', function (e) {
                 e.preventDefault();
                 Dashboard.showLoadingMsg();
-                ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
 
-                    // Rebuild the full library list from checkboxes
-                    const libs = [];
-                    document.querySelectorAll(".library-checkbox").forEach(el => {
-                        libs.push({
-                            Id: el.dataset.id,
-                            Name: el.dataset.name,
-                            ContentType: el.dataset.contentType,
-                            Selected: el.checked
-                        });
-                    });
-
-                    config.AvailableLibraries = libs;
-
-                    // Save log level
-                    config.LogLevel = document.querySelector('#selectLogLevel').value;
-
-                    ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, config).then(function (result) {
-                        Dashboard.processPluginConfigurationUpdateResult(result);
+                // Rebuild the full library list from checkboxes
+                const libs = [];
+                document.querySelectorAll(".library-checkbox").forEach(el => {
+                    libs.push({
+                        Id: el.dataset.id,
+                        Name: el.dataset.name,
+                        ContentType: el.dataset.contentType,
+                        Selected: el.checked
                     });
                 });
+
+                currentConfig.AvailableLibraries = libs;
+
+                // Save log level
+                currentConfig.LogLevel = document.querySelector('#selectLogLevel').value;
+
+                ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, currentConfig).then(function (result) {
+                    Dashboard.processPluginConfigurationUpdateResult(result);
+                });
+
                 return false;
             });
 
