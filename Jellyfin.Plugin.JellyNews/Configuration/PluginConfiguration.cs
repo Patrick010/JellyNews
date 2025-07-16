@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Jellyfin.Plugin.JellyNews.Logging;
 using MediaBrowser.Model.Plugins;
 
@@ -15,7 +14,7 @@ namespace Jellyfin.Plugin.JellyNews.Configuration
         /// </summary>
         public PluginConfiguration()
         {
-            AvailableLibraries = new Collection<LibraryInfo>();
+            AvailableLibraries = new List<LibraryInfo>();
             LogLevel = LogLevel.Debug;
         }
 
@@ -25,8 +24,8 @@ namespace Jellyfin.Plugin.JellyNews.Configuration
         public LogLevel LogLevel { get; set; }
 
         /// <summary>
-        /// Gets the available libraries.
+        /// Gets or sets the available libraries.
         /// </summary>
-        public Collection<LibraryInfo> AvailableLibraries { get; }
+        public List<LibraryInfo> AvailableLibraries { get; set; }
     }
 }
