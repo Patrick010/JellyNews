@@ -12,6 +12,7 @@ using MediaBrowser.Model.Serialization;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Core;
 
 namespace Jellyfin.Plugin.JellyNews
 {
@@ -47,7 +48,14 @@ namespace Jellyfin.Plugin.JellyNews
             _logger = _loggerFactory.CreateLogger<Plugin>();
             _logger.LogInformation("JellyNews Plugin started.");
 
-            _scanLibraryTask = new ScanLibraryTask(_logger, _libraryManager);
+            var serilogLogger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day, formatProvider: CultureInfo.InvariantCulture)
+                .CreateLogger();
+
+            var serilogLoggerFactory = new Serilog.Extensions.Logging.SerilogLoggerFactory(serilogLogger);
+
+            _scanLibraryTask = new ScanLibraryTask(serilogLoggerFactory.CreateLogger<ScanLibraryTask>(), _libraryManager);
         }
 
         /// <inheritdoc />
