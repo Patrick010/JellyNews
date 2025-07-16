@@ -15,7 +15,6 @@
                     <div id="librarySelection">
                         <h2>Select Libraries to Scan</h2>
                     </div>
-                    <input type="hidden" id="availableLibraries" name="availableLibraries" />
 
                     <div class="selectContainer">
                         <label for="selectLogLevel">Log Level:</label>
@@ -58,7 +57,7 @@
                             checkbox.id = library.Id;
                             checkbox.name = 'selectedLibraries';
                             checkbox.value = library.Id;
-                            checkbox.checked = config.SelectedLibraryIds.includes(library.Id);
+                            checkbox.checked = library.Selected;
 
                             var label = document.createElement('label');
                             label.htmlFor = library.Id;
@@ -88,17 +87,16 @@
                 ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
 
                     // Save selected libraries
-                    config.SelectedLibraryIds = [];
-                    var checkboxes = document.querySelectorAll('input[name="selectedLibraries"]:checked');
+                    var checkboxes = document.querySelectorAll('input[name="selectedLibraries"]');
                     for (var i = 0; i < checkboxes.length; i++) {
-                        config.SelectedLibraryIds.push(checkboxes[i].value);
+                        var library = config.AvailableLibraries.find(lib => lib.Id === checkboxes[i].value);
+                        if (library) {
+                            library.Selected = checkboxes[i].checked;
+                        }
                     }
 
                     // Save log level
                     config.LogLevel = document.querySelector('#selectLogLevel').value;
-
-                    // Preserve available libraries
-                    document.querySelector('#availableLibraries').value = JSON.stringify(config.AvailableLibraries);
 
                     ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);

@@ -19,5 +19,10 @@ namespace Jellyfin.Plugin.JellyNews.Configuration
         /// Gets or sets the content type of the library.
         /// </summary>
         public string? ContentType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the library is selected.
+        /// </summary>
+        public bool Selected { get; set; }
     }
 }

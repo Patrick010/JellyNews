@@ -58,7 +58,6 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
         public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
             _logger.Log(LogLevel.Information, "ScanLibraryTask Started");
-            var libraries = _libraryManager.GetUserRootFolder().Children.ToArray();
             var config = Plugin.Instance?.Configuration;
             if (config == null)
             {
@@ -66,27 +65,33 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
                 return Task.CompletedTask;
             }
 
+            var existingLibraries = config.AvailableLibraries.Where(l => l.Id != null).ToDictionary(l => l.Id!);
+            config.AvailableLibraries.Clear();
+
+            var libraries = _libraryManager.GetUserRootFolder().Children.ToArray();
             foreach (var library in libraries)
             {
                 if (library is Folder folder)
                 {
-                    if (!config.AvailableLibraries.Any(l => l.Id == folder.Id.ToString()))
+                    if (existingLibraries.TryGetValue(folder.Id.ToString(), out var existingLibrary))
+                    {
+                        config.AvailableLibraries.Add(existingLibrary);
+                    }
+                    else
                     {
                         _logger.Log(LogLevel.Information, $"Found new library: {folder.Name} with Id: {folder.Id}");
-
                         config.AvailableLibraries.Add(new LibraryInfo
                         {
                             Name = folder.Name,
                             Id = folder.Id.ToString(),
-                            ContentType = folder.GetClientTypeName()
+                            ContentType = folder.GetClientTypeName(),
+                            Selected = false
                         });
-
                         _logger.Log(LogLevel.Information, $"Added library {folder.Name} to available libraries");
                     }
                 }
             }
 
-            config.AvailableLibrariesJson = System.Text.Json.JsonSerializer.Serialize(config.AvailableLibraries);
             Plugin.Instance?.UpdateConfiguration(config);
             _logger.Log(LogLevel.Information, "ScanLibraryTask Finished");
             progress.Report(100);
