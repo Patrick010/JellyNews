@@ -86,6 +86,7 @@ namespace Jellyfin.Plugin.JellyNews.Tasks
                 }
             }
 
+            config.AvailableLibrariesJson = System.Text.Json.JsonSerializer.Serialize(config.AvailableLibraries);
             Plugin.Instance?.UpdateConfiguration(config);
             _logger.Log(LogLevel.Information, "ScanLibraryTask Finished");
             progress.Report(100);

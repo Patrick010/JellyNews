@@ -15,6 +15,7 @@
                     <div id="librarySelection">
                         <h2>Select Libraries to Scan</h2>
                     </div>
+                    <input type="hidden" id="availableLibraries" name="availableLibraries" />
 
                     <div class="selectContainer">
                         <label for="selectLogLevel">Log Level:</label>
@@ -95,6 +96,9 @@
 
                     // Save log level
                     config.LogLevel = document.querySelector('#selectLogLevel').value;
+
+                    // Preserve available libraries
+                    document.querySelector('#availableLibraries').value = JSON.stringify(config.AvailableLibraries);
 
                     ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);
