@@ -95,7 +95,6 @@
 
             document.querySelector('#JellyNewsConfigForm').addEventListener('submit', function (e) {
                 e.preventDefault();
-                Dashboard.showLoadingMsg();
 
                 // Rebuild the full library list from checkboxes
                 const libs = [];
@@ -115,7 +114,9 @@
 
                 document.querySelector('#debug-output').textContent = JSON.stringify(currentConfig, null, 2);
 
+                Dashboard.showLoadingMsg();
                 ApiClient.updatePluginConfiguration(JellyNewsConfig.pluginUniqueId, currentConfig).then(function (result) {
+                    Dashboard.hideLoadingMsg();
                     Dashboard.processPluginConfigurationUpdateResult(result);
                 });
 
