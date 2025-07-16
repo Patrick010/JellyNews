@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Jellyfin.Plugin.JellyNews.Configuration;
 using Jellyfin.Plugin.JellyNews.Tasks;
 using MediaBrowser.Common.Configuration;
@@ -23,8 +24,8 @@ namespace Jellyfin.Plugin.JellyNews
         /// <inheritdoc />
         public override string Name => "JellyNews";
 
-        private readonly ILibraryManager _libraryManager;
-        private readonly ScanLibraryTask _scanLibraryTask;
+        private readonly ILibraryManager? _libraryManager;
+        private readonly ScanLibraryTask? _scanLibraryTask;
         private static readonly Serilog.Core.LoggingLevelSwitch _levelSwitch =
             new(LogEventLevel.Information);
 
@@ -39,23 +40,30 @@ namespace Jellyfin.Plugin.JellyNews
         /// <param name="libraryManager">The library manager.</param>
         public Plugin(IApplicationPaths paths, IXmlSerializer xmlSerializer, ILibraryManager libraryManager) : base(paths, xmlSerializer)
         {
-            Instance = this;
-            _libraryManager = libraryManager;
-            _scanLibraryTask = new ScanLibraryTask(_libraryManager);
-            var logFile = Path.Combine(paths.LogDirectoryPath, "jellynews.log");
+            try
+            {
+                Instance = this;
+                _libraryManager = libraryManager;
+                _scanLibraryTask = new ScanLibraryTask(_libraryManager);
+                var logFile = Path.Combine(paths.LogDirectoryPath, "jellynews.log");
 
-            Log = new LoggerConfiguration()
-                .MinimumLevel.ControlledBy(_levelSwitch)
-                .WriteTo.File(
-                    logFile,
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 14,
-                    buffered: true,
-                    flushToDiskInterval: TimeSpan.FromSeconds(5),
-                    formatProvider: CultureInfo.InvariantCulture)
-                .CreateLogger();
+                Log = new LoggerConfiguration()
+                    .MinimumLevel.ControlledBy(_levelSwitch)
+                    .WriteTo.File(
+                        logFile,
+                        rollingInterval: RollingInterval.Day,
+                        retainedFileCountLimit: 14,
+                        buffered: true,
+                        flushToDiskInterval: TimeSpan.FromSeconds(5),
+                        formatProvider: CultureInfo.InvariantCulture)
+                    .CreateLogger();
 
-            Log.Information("JellyNews logger initialised → {LogFile}", logFile);
+                Log.Information("JellyNews logger initialised → {LogFile}", logFile);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error initializing JellyNews plugin: " + ex.Message);
+            }
         }
 
         /// <summary>
@@ -97,7 +105,7 @@ namespace Jellyfin.Plugin.JellyNews
         /// <returns>The scheduled tasks.</returns>
         public IEnumerable<IScheduledTask> GetScheduledTasks()
         {
-            return new[] { _scanLibraryTask };
+            return _scanLibraryTask is not null ? new[] { _scanLibraryTask } : Enumerable.Empty<IScheduledTask>();
         }
     }
 }
