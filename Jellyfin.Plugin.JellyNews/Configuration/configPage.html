@@ -58,6 +58,10 @@
                             checkbox.name = 'selectedLibraries';
                             checkbox.value = library.Id;
                             checkbox.checked = library.Selected;
+                            checkbox.dataset.id = library.Id;
+                            checkbox.dataset.name = library.Name;
+                            checkbox.dataset.contentType = library.ContentType;
+                            checkbox.classList.add('library-checkbox');
 
                             var label = document.createElement('label');
                             label.htmlFor = library.Id;
@@ -86,14 +90,18 @@
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(JellyNewsConfig.pluginUniqueId).then(function (config) {
 
-                    // Save selected libraries
-                    var checkboxes = document.querySelectorAll('input[name="selectedLibraries"]');
-                    for (var i = 0; i < checkboxes.length; i++) {
-                        var library = config.AvailableLibraries.find(lib => lib.Id === checkboxes[i].value);
-                        if (library) {
-                            library.Selected = checkboxes[i].checked;
-                        }
-                    }
+                    // Rebuild the full library list from checkboxes
+                    const libs = [];
+                    document.querySelectorAll(".library-checkbox").forEach(el => {
+                        libs.push({
+                            Id: el.dataset.id,
+                            Name: el.dataset.name,
+                            ContentType: el.dataset.contentType,
+                            Selected: el.checked
+                        });
+                    });
+
+                    config.AvailableLibraries = libs;
 
                     // Save log level
                     config.LogLevel = document.querySelector('#selectLogLevel').value;
